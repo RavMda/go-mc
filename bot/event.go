@@ -1,7 +1,7 @@
 package bot
 
 import (
-	pk "github.com/Tnze/go-mc/net/packet"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 type Events struct {
@@ -38,7 +38,7 @@ type PacketHandlerFunc func(p pk.Packet) error
 type PacketHandler struct {
 	ID       int32
 	Priority int
-	F        func(p pk.Packet) error
+	F        func(c *Client, p pk.Packet) error
 }
 
 // handlerHeap is PriorityQueue<PacketHandlerFunc>

@@ -1,7 +1,7 @@
 package save
 
 import (
-	"github.com/Tnze/go-mc/save/region"
+	"github.com/RavMda/go-mc/save/region"
 	"math/rand"
 	"testing"
 )

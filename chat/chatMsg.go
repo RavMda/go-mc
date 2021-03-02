@@ -4,19 +4,19 @@
 // or net/packet.Field .
 //
 // It's very recommended that use SetLanguage before using Message.String or Message.ClearString,
-// or the `github.com/Tnze/go-mc/data/en-us` will be used.
+// or the `github.com/RavMda/go-mc/data/en-us` will be used.
 // Note: The package of data/lang/... will SetLanguage on theirs init() so you don't need to call by your self.
 package chat
 
 import (
 	"encoding/json"
 	"fmt"
-	en_us "github.com/Tnze/go-mc/data/lang/en-us"
+	en_us "github.com/RavMda/go-mc/data/lang/en-us"
 	"io"
 	"regexp"
 	"strings"
 
-	pk "github.com/Tnze/go-mc/net/packet"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 //Message is a message sent by other

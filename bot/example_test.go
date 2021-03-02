@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"encoding/hex"
-	"github.com/Tnze/go-mc/offline"
-	"github.com/Tnze/go-mc/yggdrasil"
+	"github.com/RavMda/go-mc/offline"
+	"github.com/RavMda/go-mc/yggdrasil"
 )
 
 func ExamplePingAndList() {
@@ -20,7 +20,7 @@ func ExamplePingAndList() {
 
 func ExampleClient_JoinServer_offline() {
 	c := NewClient()
-	c.Auth.Name = "Tnze" // set it's name before login.
+	c.Auth.Name = "RavMda" // set it's name before login.
 
 	id := offline.NameToUUID(c.Auth.Name) // optional, get uuid of offline mode game
 	c.Auth.UUID = hex.EncodeToString(id[:])

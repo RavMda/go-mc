@@ -3,18 +3,18 @@ package basic
 import (
 	"github.com/google/uuid"
 
-	"github.com/Tnze/go-mc/bot"
-	"github.com/Tnze/go-mc/chat"
-	"github.com/Tnze/go-mc/data/packetid"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/bot"
+	"github.com/RavMda/go-mc/chat"
+	"github.com/RavMda/go-mc/data/packetid"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 type EventsListener struct {
-	GameStart    func() error
-	ChatMsg      func(c chat.Message, pos byte, uuid uuid.UUID) error
-	Disconnect   func(reason chat.Message) error
-	HealthChange func(health float32) error
-	Death        func() error
+	GameStart    func(c *bot.Client) error
+	ChatMsg      func(cl *bot.Client, c chat.Message, pos byte, uuid uuid.UUID) error
+	Disconnect   func(c *bot.Client, reason chat.Message) error
+	HealthChange func(c *bot.Client, health float32) error
+	Death        func(c *bot.Client) error
 }
 
 func (e EventsListener) Attach(c *bot.Client) {
@@ -26,25 +26,25 @@ func (e EventsListener) Attach(c *bot.Client) {
 	)
 }
 
-func (e *EventsListener) onJoinGame(_ pk.Packet) error {
+func (e *EventsListener) onJoinGame(c *bot.Client, _ pk.Packet) error {
 	if e.GameStart != nil {
-		return e.GameStart()
+		return e.GameStart(c)
 	}
 	return nil
 }
 
-func (e *EventsListener) onDisconnect(p pk.Packet) error {
+func (e *EventsListener) onDisconnect(c *bot.Client, p pk.Packet) error {
 	if e.Disconnect != nil {
 		var reason chat.Message
 		if err := p.Scan(&reason); err != nil {
 			return Error{err}
 		}
-		return e.Disconnect(reason)
+		return e.Disconnect(c, reason)
 	}
 	return nil
 }
 
-func (e *EventsListener) onChatMsg(p pk.Packet) error {
+func (e *EventsListener) onChatMsg(c *bot.Client, p pk.Packet) error {
 	if e.ChatMsg != nil {
 		var msg chat.Message
 		var pos pk.Byte
@@ -54,12 +54,12 @@ func (e *EventsListener) onChatMsg(p pk.Packet) error {
 			return Error{err}
 		}
 
-		return e.ChatMsg(msg, byte(pos), uuid.UUID(sender))
+		return e.ChatMsg(c, msg, byte(pos), uuid.UUID(sender))
 	}
 	return nil
 }
 
-func (e *EventsListener) onUpdateHealth(p pk.Packet) error {
+func (e *EventsListener) onUpdateHealth(c *bot.Client, p pk.Packet) error {
 	if e.ChatMsg != nil {
 		var health pk.Float
 		var food pk.VarInt
@@ -69,12 +69,12 @@ func (e *EventsListener) onUpdateHealth(p pk.Packet) error {
 			return Error{err}
 		}
 		if e.HealthChange != nil {
-			if err := e.HealthChange(float32(health)); err != nil {
+			if err := e.HealthChange(c, float32(health)); err != nil {
 				return err
 			}
 		}
 		if e.Death != nil && health <= 0 {
-			if err := e.Death(); err != nil {
+			if err := e.Death(c); err != nil {
 				return err
 			}
 		}

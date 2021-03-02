@@ -3,8 +3,9 @@ package basic
 import (
 	"unsafe"
 
-	"github.com/Tnze/go-mc/data/packetid"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/bot"
+	"github.com/RavMda/go-mc/data/packetid"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 // WorldInfo content player info in server.
@@ -37,7 +38,7 @@ type ServInfo struct {
 	Brand string
 }
 
-func (p *Player) handleJoinGamePacket(packet pk.Packet) error {
+func (p *Player) handleJoinGamePacket(c *bot.Client, packet pk.Packet) error {
 	var WorldCount pk.VarInt
 	var WorldNames = make([]pk.Identifier, 0)
 	err := packet.Scan(

@@ -1,11 +1,12 @@
 package basic
 
 import (
-	"github.com/Tnze/go-mc/data/packetid"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/bot"
+	"github.com/RavMda/go-mc/data/packetid"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
-func (p Player) handleKeepAlivePacket(packet pk.Packet) error {
+func (p Player) handleKeepAlivePacket(c *bot.Client, packet pk.Packet) error {
 	var KeepAliveID pk.Long
 	if err := packet.Scan(&KeepAliveID); err != nil {
 		return Error{err}
@@ -21,7 +22,7 @@ func (p Player) handleKeepAlivePacket(packet pk.Packet) error {
 	return nil
 }
 
-func (p *Player) handlePlayerPositionAndLook(packet pk.Packet) error {
+func (p *Player) handlePlayerPositionAndLook(c *bot.Client, packet pk.Packet) error {
 	var (
 		X, Y, Z    pk.Double
 		Yaw, Pitch pk.Float

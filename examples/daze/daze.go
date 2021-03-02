@@ -1,7 +1,7 @@
 // Daze could join an offline-mode server as client.
 // Just standing there and do nothing. Automatically reborn after five seconds of death.
 //
-// BUG(Tnze): Kick by Disconnect: Time Out
+// BUG(RavMda): Kick by Disconnect: Time Out
 package main
 
 import (
@@ -12,10 +12,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Tnze/go-mc/bot"
-	"github.com/Tnze/go-mc/bot/basic"
-	"github.com/Tnze/go-mc/chat"
-	_ "github.com/Tnze/go-mc/data/lang/zh-cn"
+	"github.com/RavMda/go-mc/bot"
+	"github.com/RavMda/go-mc/bot/basic"
+	"github.com/RavMda/go-mc/chat"
+	_ "github.com/RavMda/go-mc/data/lang/zh-cn"
 )
 
 var address = flag.String("address", "127.0.0.1", "The server address")
@@ -61,7 +61,7 @@ func main() {
 	}
 }
 
-func onDeath() error {
+func onDeath(c *bot.Client) error {
 	log.Println("Died and Respawned")
 	// If we exclude Respawn(...) then the player won't press the "Respawn" button upon death
 	go func() {
@@ -74,12 +74,12 @@ func onDeath() error {
 	return nil
 }
 
-func onGameStart() error {
+func onGameStart(c *bot.Client) error {
 	log.Println("Game start")
 	return nil //if err isn't nil, HandleGame() will return it.
 }
 
-func onChatMsg(c chat.Message, _ byte, _ uuid.UUID) error {
+func onChatMsg(cl *bot.Client, c chat.Message, _ byte, _ uuid.UUID) error {
 	log.Println("Chat:", c.ClearString()) // output chat message without any format code (like color or bold)
 	return nil
 }
@@ -92,7 +92,7 @@ func (d DisconnectErr) Error() string {
 	return "disconnect: " + d.Reason.String()
 }
 
-func onDisconnect(reason chat.Message) error {
+func onDisconnect(c *bot.Client, reason chat.Message) error {
 	// return a error value so that we can stop main loop
 	return DisconnectErr{Reason: reason}
 }

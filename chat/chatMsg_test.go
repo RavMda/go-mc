@@ -3,11 +3,11 @@ package chat_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/Tnze/go-mc/chat"
-	en_us "github.com/Tnze/go-mc/data/lang/en-us"
+	"github.com/RavMda/go-mc/chat"
+	en_us "github.com/RavMda/go-mc/data/lang/en-us"
 	"testing"
 
-	pk "github.com/Tnze/go-mc/net/packet"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 /*
@@ -31,8 +31,8 @@ var jsons = []string{
 	`{"translate":"translation.test.args","with":["str1","str2"]}`,
 	`{"translate":"translation.test.world"}`,
 
-	`"Tnze"`,
-	`"§0Tnze"`,
+	`"RavMda"`,
+	`"§0RavMda"`,
 	`"§list"`,
 
 	`{"extra":[" "],"text":""}`,
@@ -48,8 +48,8 @@ var texts = []string{
 	"str1 str2",
 	"world",
 
-	"Tnze",
-	"\033[30mTnze\033[0m",
+	"RavMda",
+	"\033[30mRavMda\033[0m",
 	"\033[1mist\033[0m",
 
 	" ",
@@ -65,8 +65,8 @@ var clearTexts = []string{
 	"str1 str2",
 	"world",
 
-	"Tnze",
-	"Tnze",
+	"RavMda",
+	"RavMda",
 	"ist",
 
 	" ",

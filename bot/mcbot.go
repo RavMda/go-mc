@@ -9,10 +9,10 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/Tnze/go-mc/chat"
-	"github.com/Tnze/go-mc/data/packetid"
-	mcnet "github.com/Tnze/go-mc/net"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/chat"
+	"github.com/RavMda/go-mc/data/packetid"
+	mcnet "github.com/RavMda/go-mc/net"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 // ProtocolVersion , the protocol version number of minecraft net protocol
@@ -22,12 +22,17 @@ const DefaultPort = 25565
 // JoinServer connect a Minecraft server for playing the game.
 // Using roughly the same way to parse address as minecraft.
 func (c *Client) JoinServer(addr string) (err error) {
-	return c.join(&net.Dialer{}, addr)
+	return LoginErr{"who cares", nil}
 }
 
 // JoinServerWithDialer is similar to JoinServer but using a Dialer.
 func (c *Client) JoinServerWithDialer(d *net.Dialer, addr string) (err error) {
-	return c.join(d, addr)
+	return LoginErr{"who cares", nil}
+}
+
+// JoinServerRaw allows you to specify protocol
+func (c *Client) JoinRaw(conn net.Conn, addr string, protocol int) (err error) {
+	return c.join(conn, addr, ProtocolVersion)
 }
 
 // parseAddress will lookup SRV records for the address
@@ -55,9 +60,9 @@ func parseAddress(r *net.Resolver, addr string) (string, error) {
 	return net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10)), nil
 }
 
-func (c *Client) join(d *net.Dialer, addr string) error {
+func (c *Client) join(conn net.Conn, addr string, protocol int) error {
 	const Handshake = 0x00
-	addrSrv, err := parseAddress(d.Resolver, addr)
+	addrSrv, err := parseAddress(net.DefaultResolver, addr)
 	if err != nil {
 		return LoginErr{"resolved address", err}
 	}
@@ -72,18 +77,14 @@ func (c *Client) join(d *net.Dialer, addr string) error {
 		return LoginErr{"parse port", err}
 	}
 
-	// Dial connection
-	c.Conn, err = mcnet.DialMC(addrSrv)
-	if err != nil {
-		return LoginErr{"connect server", err}
-	}
+	c.Conn = mcnet.WrapConn(conn)
 
 	// Handshake
 	err = c.Conn.WritePacket(pk.Marshal(
 		Handshake,
-		pk.VarInt(ProtocolVersion), // Protocol version
-		pk.String(host),            // Host
-		pk.UnsignedShort(port),     // Port
+		pk.VarInt(protocol),    // Protocol version
+		pk.String(host),        // Host
+		pk.UnsignedShort(port), // Port
 		pk.Byte(2),
 	))
 	if err != nil {

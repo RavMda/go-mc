@@ -2,7 +2,8 @@ package bot
 
 import (
 	"fmt"
-	pk "github.com/Tnze/go-mc/net/packet"
+
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 // HandleGame receive server packet and response them correctly.
@@ -39,14 +40,14 @@ func (d PacketHandlerError) Unwrap() error {
 func (c *Client) handlePacket(p pk.Packet) (err error) {
 	if c.Events.generic != nil {
 		for _, handler := range *c.Events.generic {
-			if err = handler.F(p); err != nil {
+			if err = handler.F(c, p); err != nil {
 				return PacketHandlerError{ID: p.ID, Err: err}
 			}
 		}
 	}
 	if listeners := c.Events.handlers[p.ID]; listeners != nil {
 		for _, handler := range *listeners {
-			err = handler.F(p)
+			err = handler.F(c, p)
 			if err != nil {
 				return PacketHandlerError{ID: p.ID, Err: err}
 			}

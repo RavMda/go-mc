@@ -1,17 +1,18 @@
 package main
 
 import (
-	"github.com/Tnze/go-mc/bot/basic"
-	"github.com/Tnze/go-mc/data/packetid"
-	pk "github.com/Tnze/go-mc/net/packet"
 	"log"
 	"time"
 
+	"github.com/RavMda/go-mc/bot/basic"
+	"github.com/RavMda/go-mc/data/packetid"
+	pk "github.com/RavMda/go-mc/net/packet"
+
 	"github.com/google/uuid"
 
-	"github.com/Tnze/go-mc/bot"
-	"github.com/Tnze/go-mc/chat"
-	_ "github.com/Tnze/go-mc/data/lang/en-us"
+	"github.com/RavMda/go-mc/bot"
+	"github.com/RavMda/go-mc/chat"
+	_ "github.com/RavMda/go-mc/data/lang/en-us"
 	"github.com/mattn/go-colorable"
 )
 
@@ -52,13 +53,13 @@ func main() {
 	}
 }
 
-func onDeath() error {
+func onDeath(c *bot.Client) error {
 	log.Println("Died and Respawned")
 	// If we exclude Respawn(...) then the player won't press the "Respawn" button upon death
 	return p.Respawn()
 }
 
-func onGameStart() error {
+func onGameStart(c *bot.Client) error {
 	log.Println("Game start")
 
 	watch = make(chan time.Time)
@@ -70,7 +71,7 @@ func onGameStart() error {
 var soundListener = bot.PacketHandler{
 	ID:       packetid.NamedSoundEffect,
 	Priority: 0,
-	F: func(p pk.Packet) error {
+	F: func(c *bot.Client, p pk.Packet) error {
 		var (
 			SoundName     pk.Identifier
 			SoundCategory pk.VarInt
@@ -107,12 +108,12 @@ func onSound(name string, category int, x, y, z float64, volume, pitch float32) 
 	return nil
 }
 
-func onChatMsg(c chat.Message, pos byte, uuid uuid.UUID) error {
+func onChatMsg(cl *bot.Client, c chat.Message, pos byte, uuid uuid.UUID) error {
 	log.Println("Chat:", c)
 	return nil
 }
 
-func onDisconnect(c chat.Message) error {
+func onDisconnect(cl *bot.Client, c chat.Message) error {
 	log.Println("Disconnect:", c)
 	return nil
 }

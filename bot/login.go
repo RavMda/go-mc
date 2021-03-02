@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Tnze/go-mc/net/CFB8"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/net/CFB8"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 // Auth includes a account

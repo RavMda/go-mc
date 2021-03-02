@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/Tnze/go-mc/chat"
-	"github.com/Tnze/go-mc/net"
-	pk "github.com/Tnze/go-mc/net/packet"
+	"github.com/RavMda/go-mc/chat"
+	"github.com/RavMda/go-mc/net"
+	pk "github.com/RavMda/go-mc/net/packet"
 	"github.com/google/uuid"
 	"log"
 )

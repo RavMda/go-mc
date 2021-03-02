@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	pk "github.com/Tnze/go-mc/net/packet"
+	pk "github.com/RavMda/go-mc/net/packet"
 )
 
 var VarInts = []pk.VarInt{0, 1, 2, 127, 128, 255, 2147483647, -1, -2147483648}
@@ -113,7 +113,7 @@ func TestAry_ReadFrom(t *testing.T) {
 	if len(ary) != int(num) {
 		t.Fatalf("length not match: %d != %d", len(ary), num)
 	}
-	for i, v := range []string{"Tnze", ""} {
+	for i, v := range []string{"RavMda", ""} {
 		if string(ary[i]) != v {
 			t.Errorf("want %q, get %q", v, ary[i])
 		}
