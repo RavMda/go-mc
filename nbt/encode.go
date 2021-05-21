@@ -2,27 +2,16 @@ package nbt
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"math"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
-var (
-	ErrMustBeStruct = errors.New("a compound can only be a struct")
-)
-
-func Marshal(w io.Writer, v interface{}) error {
-	return NewEncoder(w).Encode(v)
-}
-
-func MarshalCompound(w io.Writer, v interface{}, rootTagName string) error {
-	enc := NewEncoder(w)
-	val := reflect.ValueOf(v)
-	if val.Kind() != reflect.Struct {
-		return ErrMustBeStruct
-	}
-	return enc.marshal(val, TagCompound, rootTagName)
+func Marshal(w io.Writer, v interface{}, optionalTagName ...string) error {
+	return NewEncoder(w).Encode(v, optionalTagName...)
 }
 
 type Encoder struct {
@@ -33,9 +22,13 @@ func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w: w}
 }
 
-func (e *Encoder) Encode(v interface{}) error {
+func (e *Encoder) Encode(v interface{}, optionalTagName ...string) error {
 	val := reflect.ValueOf(v)
-	return e.marshal(val, getTagType(val.Type()), "")
+	var tagName string
+	if len(optionalTagName) > 0 {
+		tagName = optionalTagName[0]
+	}
+	return e.marshal(val, getTagType(val.Type()), tagName)
 }
 
 func (e *Encoder) marshal(val reflect.Value, tagType byte, tagName string) error {
@@ -58,7 +51,7 @@ func (e *Encoder) writeHeader(val reflect.Value, tagType byte, tagName string) (
 func (e *Encoder) writeValue(val reflect.Value, tagType byte) error {
 	switch tagType {
 	default:
-		return errors.New("unsupported type " + val.Type().Kind().String())
+		return errors.New("unsupported type 0x" + strconv.FormatUint(uint64(tagType), 16))
 	case TagByte:
 		_, err := e.w.Write([]byte{byte(val.Uint())})
 		return err
@@ -114,24 +107,46 @@ func (e *Encoder) writeValue(val reflect.Value, tagType byte) error {
 		return err
 
 	case TagCompound:
-		if val.Kind() == reflect.Interface {
-			val = reflect.ValueOf(val.Interface())
+		for val.Kind() == reflect.Interface {
+			val = val.Elem()
 		}
 
-		n := val.NumField()
-		for i := 0; i < n; i++ {
-			f := val.Type().Field(i)
-			tag := f.Tag.Get("nbt")
-			if (f.PkgPath != "" && !f.Anonymous) || tag == "-" {
-				continue // Private field
-			}
+		switch val.Kind() {
+		case reflect.Struct:
+			n := val.NumField()
+			for i := 0; i < n; i++ {
+				f := val.Type().Field(i)
+				tag := f.Tag.Get("nbt")
+				if (f.PkgPath != "" && !f.Anonymous) || tag == "-" {
+					continue // Private field
+				}
 
-			tagProps := parseTag(f, tag)
-			err := e.marshal(val.Field(i), tagProps.Type, tagProps.Name)
-			if err != nil {
-				return err
+				tagProps := parseTag(f, tag)
+				if err := e.marshal(val.Field(i), tagProps.Type, tagProps.Name); err != nil {
+					return err
+				}
+			}
+		case reflect.Map:
+			r := val.MapRange()
+			for r.Next() {
+				var tagName string
+				if tn, ok := r.Key().Interface().(fmt.Stringer); ok {
+					tagName = tn.String()
+				} else {
+					tagName = r.Key().String()
+				}
+				tagValue := r.Value()
+				tagType := getTagType(tagValue.Type())
+				if tagType == TagNone {
+					return errors.New("unsupported value " + tagValue.String())
+				}
+
+				if err := e.marshal(tagValue, tagType, tagName); err != nil {
+					return err
+				}
 			}
 		}
+
 		_, err := e.w.Write([]byte{TagEnd})
 		return err
 	}
@@ -154,7 +169,7 @@ func getTagType(vk reflect.Type) byte {
 		return TagDouble
 	case reflect.String:
 		return TagString
-	case reflect.Struct, reflect.Interface:
+	case reflect.Struct, reflect.Interface, reflect.Map:
 		return TagCompound
 	case reflect.Array, reflect.Slice:
 		switch vk.Elem().Kind() {
